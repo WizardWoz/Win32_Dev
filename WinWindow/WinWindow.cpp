@@ -17,10 +17,14 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+/*
+    HINSTANCE实例句柄
+    HWND窗口句柄
+*/
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,         //当前程序的实例句柄
+	_In_opt_ HINSTANCE hPrevInstance,  //上一个同类程序的实例句柄，现已弃用，始终为NULL
+	_In_ LPWSTR    lpCmdLine,          //以字符串形式传递给程序的命令行参数
+	_In_ int       nCmdShow)   //指定窗口如何显示的标志
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
