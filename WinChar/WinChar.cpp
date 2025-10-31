@@ -1,6 +1,12 @@
 ﻿#include <Windows.h>
 #include <stdio.h>
 
+/*
+  更改项目字符编码方式：
+  1.右键项目->属性->配置属性->常规->字符集
+  2.选择“使用多字节字符集”：因为Win32开发的参数多数是TCHAR类型
+*/
+
 void C_char()
 {
 	const char* pszText = "Hello Char";
