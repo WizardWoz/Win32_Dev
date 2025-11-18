@@ -1,4 +1,8 @@
 ﻿#include <Windows.h>
+#include <stdio.h>
+
+//调试程序的方法：附加一个控制台窗口输出
+HANDLE g_hOutput = 0;	//接受标准输出句柄
 
 /*
   窗口创建过程：
@@ -17,6 +21,23 @@
   LPCTSTR==TCHAR*；LPCTSTR==const TCHAR*；
 */
 
+void OnCreate(HWND hWnd,LPARAM lParam)
+{
+	CREATESTRUCT* pCS = (CREATESTRUCT*)lParam;
+	const WCHAR* pszText=(WCHAR*)pCS->lpCreateParams;
+	MessageBox(NULL, pszText, L"提示", MB_OK);
+	CreateWindowEx(0, L"EDIT", L"hello", WS_CHILD | WS_VISIBLE | WS_BORDER, 0, 0, 200, 200, hWnd, NULL, 0, NULL);
+}
+
+void OnSize(HWND hWnd, LPARAM lParam)
+{
+	short nWidth = LOWORD(lParam);
+	short nHeight = HIWORD(lParam);
+	WCHAR szText[256] = { 0 };
+	wsprintf(szText, L"width=%d,height=%d", nWidth, nHeight);
+	WriteConsole(g_hOutput, szText, wcslen(szText) * sizeof(WCHAR), NULL, NULL);
+}
+
 /*
   2.窗口过程函数WndProc，处理窗口的各种消息
   传参时只传消息的四个组成部分：窗口句柄、消息ID、消息参数wParam、消息参数lParam
@@ -26,11 +47,48 @@
 */
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msgID, WPARAM wParam, LPARAM lParam)
 {
+	/*
+		WM_DESTROY消息：窗口被销毁时发送，wParam=0，lParam=0，常用于在窗口销毁之前做相应的善后处理（例：资源、内存）
+
+		WM_SYSCOMMAND消息：点击窗口右上角的按钮时发送，wParam=具体点击的位置（例：关闭SC_CLOSE、最大化SC_MAXIMIZE），
+		lParam=鼠标光标位置，LOWORD(lParam)水平位置，HIWORD(lParam)垂直位置；常用于窗口关闭时提示用户处理
+
+		WM_CREATE消息：窗口创建成功但还未显示，wParam=0，lParam=指向CREATESTRUCT结构体的指针，通过该指针可以获取CreateWindowEx函数的全部12个参数
+		常用于初始化窗口的参数、资源等，包括创建子窗口
+
+		WM_SIZE消息：窗口大小发生变化后，wParam=窗口大小变化的原因，lParam=窗口变化后的大小，LOWORD(lParam)宽度，HIWORD(lParam)高度
+		常用于窗口大小变化后，调整窗口内各个部分的布局
+
+		WM_QUIT消息：程序员控制发送时间，wParam=PostQuitMessage函数的参数，lParam=0，常用于结束消息循环，退出程序
+		不需要程序员自定义函数处理
+	*/
 	switch (msgID)
 	{
+	case WM_CREATE:	//窗口创建消息
+		OnCreate(hWnd, lParam); //自定义函数，处理窗口创建时的消息
+		break;
 	case WM_DESTROY:	//窗口销毁消息
 		PostQuitMessage(0);	//向消息队列发送退出消息（可以使GetMessage宏返回0），结束程序
 		break;
+	case WM_SYSCOMMAND:	//系统命令消息
+		//点击窗口关闭按钮后，产生WM_SYSCOMMAND消息，之后执行默认窗口过程函数DefWindowProc，最终销毁窗口产生WM_DESTROY消息
+		//case WM_DESTROY调用PostQuitMessage退出消息循环，结束程序
+		//MessageBox(hWnd, L"系统命令消息", L"提示", MB_OK);	//弹出消息框提示用户，是阻塞函数
+		if (wParam==SC_CLOSE)
+		{
+			int nRet = MessageBox(hWnd, L"是否退出", L"Info", MB_YESNO);
+			if (nRet==IDYES)
+			{
+
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		break;
+	case WM_SIZE:	//窗口大小变化消息
+		OnSize(hWnd, lParam);
 	default:
 		break;
 	}
@@ -48,6 +106,9 @@ int CALLBACK WinMain(_In_ HINSTANCE hIns,	//当前程序的实例句柄
 	_In_ LPSTR lpCmdLine,		//以字符串形式传递给程序的命令行参数
 	_In_ int nCmdShow)			//指定窗口如何显示的标志
 {
+	AllocConsole();	//分配控制台窗口
+	g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);	//获取标准输出句柄
+
 	//3.注册窗口类WNDCLASS wc，向操作系统内核写入一些数据
 	//窗口类：包含了窗口各种参数信息的数据结构（结构体）
 	//每个窗口都具有窗口类，基于窗口类创建窗口
@@ -87,6 +148,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hIns,	//当前程序的实例句柄
 	  4.使用找到的窗口类信息创建窗口返回
 	  5.在系统窗口类中查找，如果找到则创建窗口返回，否则创建窗口失败
 	*/
+	WCHAR* pszText = (WCHAR*)L"hello data";
 	HWND hWnd = CreateWindow(TEXT("Main"),	//已经注册的窗口类名称（注意）
 		__TEXT("window"),		//窗口标题栏名称
 		WS_OVERLAPPEDWINDOW,	//窗口风格
@@ -98,7 +160,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hIns,	//当前程序的实例句柄
 		NULL,	//父窗口句柄
 		NULL,	//菜单句柄
 		hIns,	//当前模块的实例句柄（注意）
-		NULL);	//创建窗口附加参数
+		pszText);	//创建窗口附加参数
 
 	//8.创建子窗口
 	//(1)创建时要设置父窗口句柄
