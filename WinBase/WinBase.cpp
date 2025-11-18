@@ -19,6 +19,10 @@
 
 /*
   2.窗口过程函数WndProc，处理窗口的各种消息
+  传参时只传消息的四个组成部分：窗口句柄、消息ID、消息参数wParam、消息参数lParam
+  其实不用关心其他两个组成部分：产生的时间、产生时的鼠标位置
+
+  函数名，参数名可以改，但是返回值类型和参数类型不能改
 */
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msgID, WPARAM wParam, LPARAM lParam)
 {
@@ -30,6 +34,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msgID, WPARAM wParam, LPARAM lParam)
 	default:
 		break;
 	}
+	//在自定义窗口过程函数中不处理的消息、子窗口消息等，都会调用默认窗口过程函数DefWindowProc处理
 	return DefWindowProc(hWnd, msgID, wParam, lParam);
 }
 /*
@@ -147,12 +152,29 @@ int CALLBACK WinMain(_In_ HINSTANCE hIns,	//当前程序的实例句柄
 	//6.消息循环Message Loop，从消息队列中获取消息并分发给窗口过程函数WndProc处理
 	MSG nMsg = { 0 };
 	//关闭窗口后程序仍存在于内存中，必须通过GetMessage宏（调用GetMessageW函数）返回0退出消息循环，结束程序
+	//GetMessage宏从消息队列中获取所有消息，返回值大于0表示获取到有效消息，等于0表示获取到退出消息WM_QUIT，负值表示出错
+	//LPMSG参数是一个指向MSG结构体的指针，用于存储获取到的消息；HWND hwnd参数是指定从哪个窗口的消息队列中获取消息，NULL表示从当前线程的消息队列中获取所有窗口的消息
+	//UINT wMsgFilterMin参数和UINT wMsgFilterMax参数用于指定要获取的消息范围，0表示获取所有消息
 	while (GetMessage(&nMsg, NULL, 0, 0))	//从消息队列中获取消息
 	{
-		TranslateMessage(&nMsg);	//翻译消息
-		DispatchMessage(&nMsg);		//分发消息，谁处理消息就发给谁，例如第2步中的WndProc函数
+		//翻译消息，将按键消息（可见字符按键）转换为字符消息
+		TranslateMessage(&nMsg);
+		//分发消息，调用该消息所属窗口的窗口过程处理函数，例如第2步中的WndProc函数（窗口的窗口过程处理函数）
+		DispatchMessage(&nMsg);
 		//7.各种消息处理
 	}
+
+	/*
+	  Windows平台下的消息组成：
+	  1.窗口句柄
+	  2.消息ID
+	  3.消息参数wParam
+	  4.消息参数lParam
+	  5.产生的时间
+	  6.产生时的鼠标位置
+
+	  消息作用：当系统通知窗口工作时，就采用消息的方式派发给窗口
+	*/
 
 	return 0;
 }
