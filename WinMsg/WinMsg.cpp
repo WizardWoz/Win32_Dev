@@ -22,6 +22,9 @@ HANDLE g_hOutput = 0;	//接受标准输出句柄
   LPCTSTR==TCHAR*；LPCTSTR==const TCHAR*；
 */
 
+/*
+* 窗口创建成功之后，显示之前被调用
+*/
 void OnCreate(HWND hWnd, LPARAM lParam)
 {
 	CREATESTRUCT* pCS = (CREATESTRUCT*)lParam;
@@ -115,6 +118,23 @@ void OnMouseWheel(HWND hWnd, WPARAM wParam)
 	WriteConsole(g_hOutput, szText, lstrlen(szText), NULL, NULL);
 }
 
+void OnTimer(HWND hWnd, WPARAM wParam)
+{
+	WCHAR szText[256] = { 0 };
+	wsprintf(szText, L"WM_TIMER：定时器ID=%d\n", wParam);
+	WriteConsole(g_hOutput, szText, lstrlen(szText), NULL, NULL);
+	//根据定时器ID进入不同分支执行
+	switch (wParam)
+	{
+	case 1:
+		break;
+	case 2:
+		break;
+	default:
+		break;
+	}
+}
+
 /*
   2.窗口过程函数WndProc，处理窗口的各种消息（PostMessage、SendMessage产生的）
   传参时只传消息的四个组成部分：窗口句柄、消息ID、消息参数wParam、消息参数lParam
@@ -161,8 +181,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msgID, WPARAM wParam, LPARAM lParam)
 	* LOWORD(wParam)：其他按键的状态；HIWORD(wParam)：滚轮偏移量，通过正负值表示滚动方向，正为向前滚动，负为向后滚动
 	* LOWORD(lParam)：鼠标当前位置（屏幕坐标系）的X坐标；HIWORD(lParam)：鼠标当前位置（屏幕坐标系）的Y坐标
 	*/
+	/*
+	* 定时器消息：程序中创建的定时器到达时间间隔时，会向程序发送一个WM_TIMER消息。精度是毫秒，但准确度很低；例如设置时间间隔为1000ms，但会在非1000ms收到消息
+	* wParam：定时器ID；lParam：定时器处理函数的指针
+	*/
 	switch (msgID)
 	{
+	case WM_TIMER:
+		OnTimer(hWnd, wParam);
+		break;
 	case WM_MOUSEWHEEL:
 		OnMouseWheel(hWnd, wParam);
 		break;
@@ -194,8 +221,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msgID, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 		OnPaint(hWnd);
 		break;
-	case WM_CREATE:	//窗口创建消息
+	case WM_CREATE:	//窗口创建成功，显示之前消息
 		OnCreate(hWnd, lParam); //自定义函数，处理窗口创建时的消息
+		SetTimer(hWnd, 1, 1000, NULL);		//定时器1
+		SetTimer(hWnd, 2, 2000, NULL);		//定时器2
 		break;
 	case WM_DESTROY:	//窗口销毁消息
 		//PostQuitMessage(0);	//向消息队列发送退出消息（可以使GetMessage宏返回0），结束程序
@@ -434,6 +463,13 @@ int CALLBACK WinMain(_In_ HINSTANCE hIns,	//当前程序的实例句柄
 	* 2.程序消息队列：属于每一个应用程序（线程）的消息队列，由应用程序（线程）进行维护；
 	* 
 	* 消息传递路径：PostMessage/SendMessage -> 系统消息队列 -> 程序消息队列 -> PeekMessage/GetMessage -> TranslateMessage -> DispatchMessage -> WndProc
+	*/
+
+	/*
+	* 创建定时器 UINT_PTR SetTimer 
+	* 参数：1.窗口句柄HWND hWnd；2.UINT_PTR nIDEvent定时器ID；3.UINT uElapse时间间隔；4.TIMERPROC lpTimerFunc定时器处理函数的指针（一般不使用，为NULL）
+	* 关闭定时器 BOOL KillTimer
+	* 参数：1.窗口句柄HWND hWnd；2.UINT_PTR nIDEvent定时器ID
 	*/
 
 	return 0;
