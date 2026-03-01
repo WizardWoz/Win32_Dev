@@ -2,11 +2,64 @@
 #include <stdio.h>
 #include "resource.h"
 
+/*
+* 菜单分类：HMENU类型表示菜单，ID表示菜单项
+* 1.窗口的顶层菜单
+*	在窗口的标题栏上显示的菜单
+* 2.弹出式菜单：
+	(1)点击鼠标右键弹出的菜单
+	(2)点击顶层菜单出现的下拉菜单
+* 3.系统菜单
+*	在窗口标题栏点击鼠标弹出的菜单，或者点击窗口右上角的关闭、最大化、最小化按钮时弹出的菜单
+* 菜单资源的使用（课程不涉及HTML、Ribbon、Toolbar资源）
+* 1.添加菜单资源：可视化图形界面设计工具，无需代码或者少代码
+* 2.加载菜单资源：HMENU LoadMenu函数
+* (1) 注册窗口类时设置菜单
+* (2) 创建窗口时设置菜单
+* (3) 在主窗口WM_CREATE消息中利用SetMenu函数设置菜单
+*/
+
+/*
+ * 图标资源
+ * 1.添加资源：可视化图形界面设计工具，无需代码或者少代码；一个图标文件中可以有多个大小不同的图标
+ * 2.加载资源：HICON LoadIcon函数，返回图标句柄；HICON LoadImage函数，返回图标句柄
+ * 3.使用资源：
+     (1)在注册窗口类WNDCLASS时设置hIcon成员
+	 (2)在窗口过程函数WndProc处理WM_CREATE消息时利用SendMessage函数发送WM_SETICON消息设置图标（程序运行时动态调整）
+*/
+
+/*
+ * 光标资源
+ * 1.添加资源：可视化图形界面设计工具，无需代码或者少代码；每种光标有HotSpot，是当前鼠标实际作用位置，没有设置则默认在位图最左上角
+     一个光标文件中可以有多个大小不同的光标
+ * 2.加载资源：HCURSOR LoadCursor函数，返回光标句柄
+ * 3.使用资源：
+	 (1)在注册窗口类WNDCLASS时设置hCursor成员
+	 (2)在窗口过程函数WndProc处理WM_SETCURSOR消息时利用SetCursor函数设置光标（程序运行时动态调整）
+*/
+
+/*
+ * 字符串资源
+ * 1.添加资源：可视化图形界面设计工具，无需代码或者少代码；每个字符串资源包含一个ID和一个字符串内容
+ * 2.加载资源：LoadString函数，返回字符串内容；成功则返回字符串长度，失败则返回0
+ * 3.使用资源：在程序中需要使用字符串内容的地方调用LoadString函数加载字符串资源
+*/
+
+/*
+ * 加速键资源
+ * 1.添加资源：资源视图中添加加速键表，增加命令ID对应的加速键
+ * 2.加载资源：LoadAccelerators函数，返回加速键表句柄；TranslateAccelerator函数，翻译加速键消息，如果是加速键消息则返回非0，否则返回0
+ * 3.使用资源：在消息循环Message Loop中调用TranslateAccelerator函数翻译加速键消息
+*/
+
 HINSTANCE g_hInstance = 0;	//保存WinMain的第一个参数（当前程序实例句柄）
+//调试程序的方法：附加一个控制台窗口输出
+HANDLE g_hOutput = 0;	//接受标准输出句柄
+
 void OnCreate(HWND hWnd)
 {
 	//在窗口创建成功但还未显示时，利用WM_CREATE消息进行一些初始化操作，例如设置菜单、创建子窗口等
-	//1.在窗口创建成功但还未显示时设置菜单
+	//1.在窗口创建成功但还未显示时设置菜单（到本进程g_hInstance的资源中加载菜单资源）
 	HMENU hMenu = LoadMenu(g_hInstance, MAKEINTRESOURCE(IDR_MENU1));	//加载菜单资源，返回菜单句柄
 	SetMenu(hWnd, hMenu);	//设置窗口菜单
 }
@@ -17,7 +70,14 @@ void OnCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
 	switch (LOWORD(wParam))
 	{
 	case ID_NEW:
-		MessageBox(hWnd, L"新建被点击", L"Info", MB_OK);
+		if (HIWORD(wParam)==0)
+		{
+			MessageBox(hWnd, L"新建菜单项被点击", L"Info", MB_OK);
+		}
+		else if (HIWORD(wParam) == 1)
+		{
+			MessageBox(hWnd, L"CTRL+M被点击", L"Info", MB_OK);
+		}
 		break;
 	case ID_ABOUT:
 		MessageBox(hWnd, L"关于被点击", L"Info", MB_OK);
@@ -29,31 +89,6 @@ void OnCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 }
-
-/*
-* 菜单分类：HMENU类型表示菜单，ID表示菜单项
-* 1.窗口的顶层菜单
-*	在窗口的标题栏上显示的菜单
-* 2.弹出式菜单：
-	(1)点击鼠标右键弹出的菜单
-	(2)点击顶层菜单出现的下拉菜单
-* 3.系统菜单
-*	在窗口标题栏点击鼠标弹出的菜单，或者点击窗口右上角的关闭、最大化、最小化按钮时弹出的菜单
-*/
-/*
-* 菜单资源的使用（课程不涉及HTML、Ribbon、Toolbar资源）
-* 1.添加菜单资源：可视化图形界面设计工具，无需代码或者少代码
-* 2.加载菜单资源：HMENU LoadMenu函数
-* (1) 注册窗口类时设置菜单
-* (2) 创建窗口时设置菜单
-* (3) 在主窗口WM_CREATE消息中利用SetMenu函数设置菜单
-* 
-*/
-#include <Windows.h>
-#include <stdio.h>
-
-//调试程序的方法：附加一个控制台窗口输出
-HANDLE g_hOutput = 0;	//接受标准输出句柄
 
 /*
   窗口创建过程：
@@ -105,6 +140,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msgID, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		OnCommand(hWnd, wParam, lParam);
 		break;
+	case WM_SETCURSOR:
+	{
+		// 到本进程g_hInstance的资源中加载光标资源
+		HCURSOR hCursor = LoadCursor(g_hInstance, MAKEINTRESOURCE(IDC_CURSOR2));	//加载光标资源，返回光标句柄
+		// 标题栏光标不要变成黑方块
+		if (LOWORD(lParam)==HTCLIENT)
+		{
+			SetCursor(hCursor);
+			return TRUE;	//返回TRUE表示消息已处理，不再调用默认窗口过程函数DefWindowProc处理
+		}
+		else
+		{
+			// 非客户区活动
+		}
+	}
 	default:
 		break;
 	}
@@ -141,8 +191,8 @@ int CALLBACK WinMain(_In_ HINSTANCE hIns,	//当前程序的实例句柄
 	wc.cbClsExtra = 0;		//窗口类的附加数据缓冲区，赋值多少，就开辟多少字节的缓冲区
 	wc.cbWndExtra = 0;		//窗口的附加数据缓冲区，赋值多少，就开辟多少字节的缓冲区
 	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);	//绘制窗口背景的画刷句柄
-	wc.hCursor = NULL;		//窗口光标句柄，NULL表示使用系统默认光标
-	wc.hIcon = NULL;		//窗口图标句柄，NULL表示使用系统默认图标
+	wc.hCursor = LoadCursorW(hIns, MAKEINTRESOURCE(IDC_CURSOR1));		//窗口光标句柄，NULL表示使用系统默认光标
+	wc.hIcon = LoadIconA(hIns,(LPCSTR)IDI_ICON1);		//窗口图标句柄，NULL表示使用系统默认图标
 	wc.hInstance = hIns;	//当前模块的实例句柄
 	wc.lpfnWndProc = WndProc;	//窗口过程处理函数
 	//宽字节字符wchar_t每个字符占2个字节，窄字节字符char每个字符占1个字节
@@ -168,8 +218,10 @@ int CALLBACK WinMain(_In_ HINSTANCE hIns,	//当前程序的实例句柄
 	  5.在系统窗口类中查找，如果找到则创建窗口返回，否则创建窗口失败
 	*/
 	HMENU hMenu = LoadMenu(hIns, MAKEINTRESOURCE(IDR_MENU1));	//加载菜单资源，返回菜单句柄
+	LPWSTR szTitle = new WCHAR[256];
+	LoadString(g_hInstance, IDS_WND, szTitle, 256);	//加载字符串资源，只需更改WinResources.rc中字符串资源的内容
 	HWND hWnd = CreateWindow(TEXT("Main"),	//已经注册的窗口类名称（注意）
-		__TEXT("window"),		//窗口标题栏名称
+		szTitle,		//窗口标题栏名称
 		WS_OVERLAPPEDWINDOW,	//窗口风格
 		//WS_OVERLAPPEDWINDOW包含了许多其他风格
 		100,	//窗口左上角X坐标
@@ -189,16 +241,23 @@ int CALLBACK WinMain(_In_ HINSTANCE hIns,	//当前程序的实例句柄
 
 	//6.消息循环Message Loop，从消息队列中获取消息并分发给窗口过程函数WndProc处理
 	MSG nMsg = { 0 };
+	//获取加速键表句柄，后续在消息循环中翻译加速键消息
+	HACCEL hAccel = LoadAccelerators(g_hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 	//关闭窗口后程序仍存在于内存中，必须通过GetMessage宏（调用GetMessageW函数）返回0退出消息循环，结束程序
 	//GetMessage宏从消息队列中获取所有消息，返回值大于0表示获取到有效消息，等于0表示获取到退出消息WM_QUIT，负值表示出错
 	//LPMSG参数是一个指向MSG结构体的指针，用于存储获取到的消息；HWND hwnd参数是指定从哪个窗口的消息队列中获取消息，NULL表示从当前线程的消息队列中获取所有窗口的消息
 	//UINT wMsgFilterMin参数和UINT wMsgFilterMax参数用于指定要获取的消息范围，0表示获取所有消息
 	while (GetMessage(&nMsg, NULL, 0, 0))	//从消息队列中获取消息
 	{
-		//翻译消息，将按键消息（可见字符按键）转换为字符消息
-		TranslateMessage(&nMsg);
-		//分发消息，调用该消息所属窗口的窗口过程处理函数，例如第2步中的WndProc函数（窗口的窗口过程处理函数）
-		DispatchMessage(&nMsg);
+		//翻译加速键消息，如果是加速键消息则返回非0，否则返回0
+		if (!TranslateAccelerator(hWnd, hAccel, &nMsg))
+		{
+			//翻译消息，将按键消息（可见字符按键）转换为字符消息
+			TranslateMessage(&nMsg);
+			//分发消息，调用该消息所属窗口的窗口过程处理函数，例如第2步中的WndProc函数（窗口的窗口过程处理函数）
+			DispatchMessage(&nMsg);
+		}
+		
 		//7.各种消息处理
 	}
 

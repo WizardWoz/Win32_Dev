@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WinMenu.cpp">
+    <ClCompile Include="WinResources.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -25,8 +25,24 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="WinMenu.rc">
+    <ResourceCompile Include="WinResources.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cursor1.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="cursor2.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="cursor3.cur">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>
