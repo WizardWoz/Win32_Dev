@@ -1,5 +1,6 @@
 ﻿#include <Windows.h>
 #include <stdio.h>
+#include "resource.h"
 
 /*
  * 绘图基础
@@ -28,6 +29,20 @@
  *	  <4>取出DC中的画刷，使用SelectObject函数将原来的画刷重新应用到DC中
  *	  <5>释放画刷DeleteObject函数，只能删除不被DC使用的画刷；所以释放前必须将画刷从DC中取出（第4步）
  * (3)使用GetStockObject获取系统维护的画刷、画笔，如不使用画刷填充，则需要使用NULL_BRUSH参数获取不填充的画刷，该方法返回的对象无需DeleteObject
+*/
+
+/*
+ * 位图（既是资源文件，也是GDI绘图对象）
+ * 1.光栅图形：记录图像中每一点的颜色等信息；矢量图形：记录图像算法、绘图指令等；HBITMAP：位图句柄
+ * 2.使用（同时需要资源文件和GDI绘图对象的步骤）
+ * (1)资源文件.rc中添加bitmap资源
+ * (2)加载位图LoadBitmap
+ * (3)创建一个与当前DC相匹配的DC（内存DC）CreateCompatibleDC
+ * (4)将位图放入匹配的内存DC中（SelectObject函数，返回值是原来内存DC中应用的位图句柄，注意保存）
+ * (5)1比1成像BitBlt函数；缩放成像StretchBlt函数；透明成像TransparentBlt函数
+ * (6)取出位图，使用SelectObject函数将原来的位图重新应用到内存DC中
+ * (7)释放位图DeleteObject函数，只能删除不被DC使用的位图；所以释放前必须将位图从DC中取出（第6步）
+ * (8)删除内存DC，DeleteDC函数
 */
 
 HINSTANCE g_hInstance = 0;	//保存WinMain的第一个参数（当前程序实例句柄）
@@ -67,6 +82,23 @@ void DrawEllipse(HDC hdc)
 	Ellipse(hdc, 300, 300, 400, 350);	//外接矩形右下角坐标(400,350) = (左上角X坐标+宽度，左上角Y坐标+高度)
 }
 
+void DrawBmp(HDC hdc)
+{
+	//添加位图资源（无需写代码。已经添加到WinPaint.rc资源文件中）
+	//加载位图资源
+	HBITMAP hBmp = LoadBitmap(g_hInstance, (LPCWSTR)IDB_BITMAP1);
+	//创建一个内存DC并构建一个虚拟区域，内存DC在该虚拟区域中绘图
+	HDC hMemdc = CreateCompatibleDC(hdc);
+	HGDIOBJ nOldBmp = SelectObject(hMemdc, hBmp);
+	//将位图数据送给内存DC，内存DC在虚拟区域中将位图绘制出来
+	BitBlt(hdc, 400, 400, 48, 48, hMemdc, 0, 0, SRCCOPY);
+	StretchBlt(hdc, 200, 400, 24, 24, hMemdc, 0, 0, 48, 48, SRCCOPY);
+	//将虚拟区域中绘制好的图像成像到窗口DC中
+	SelectObject(hMemdc, nOldBmp);
+	DeleteObject(hBmp);
+	DeleteDC(hMemdc);
+}
+
 void OnPaint(HWND hWnd)
 {
 	PAINTSTRUCT ps = { 0 };
@@ -89,6 +121,7 @@ void OnPaint(HWND hWnd)
 	DrawLine(hdc);		//绘制线段
 	DrawRect(hdc);		//绘制矩形
 	DrawEllipse(hdc);	//绘制椭圆
+	DrawBmp(hdc);		//绘制位图
 	//4.取出DC中的画笔，使用SelectObject函数将原来的画笔重新应用到DC中
 	SelectObject(hdc, hOldPen);
 	//取出DC中的画刷，使用SelectObject函数将原来的画刷重新应用到DC中
