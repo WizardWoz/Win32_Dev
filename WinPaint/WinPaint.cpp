@@ -45,6 +45,22 @@
  * (8)删除内存DC，DeleteDC函数
 */
 
+/*
+ * 文本
+ * 1.文本输出：使用TextOut函数在指定位置输出文本，使用SetTextColor设置文本颜色，使用SetBkColor设置文本背景色
+ * 2.字体：使用CreateFont创建字体，使用SelectObject将字体应用到DC中，使用DeleteObject释放字体
+ * 3.文本对齐：使用SetTextAlign设置文本对齐方式
+ * 
+ * 字体
+ * 1.Windows常用的字体为TrueType格式；字体名：标识字体类型，HFONT字体句柄
+ * 2.使用
+ * (1)创建字体CreateFont函数
+ * (2)使用SelectObject函数将字体应用到DC中
+ * (3)绘制文字DrawText/TextOut函数
+ * (4)取出字体，使用SelectObject函数将原来的字体重新应用到DC中
+ * (5)使用DeleteObject函数释放字体
+*/
+
 HINSTANCE g_hInstance = 0;	//保存WinMain的第一个参数（当前程序实例句柄）
 //调试程序的方法：附加一个控制台窗口输出
 HANDLE g_hOutput = 0;	//接受标准输出句柄
@@ -102,6 +118,7 @@ void DrawBmp(HDC hdc)
 void OnPaint(HWND hWnd)
 {
 	PAINTSTRUCT ps = { 0 };
+	//BeginPaint函数获取DC句柄（相当于创建了一个画家），EndPaint函数释放DC句柄
 	HDC hdc = BeginPaint(hWnd, &ps);
 	//1.创建一个红色实线画笔，宽度为2像素
 	HPEN hPen = CreatePen(PS_SOLID, 2, RGB(255, 0, 0));
@@ -122,6 +139,28 @@ void OnPaint(HWND hWnd)
 	DrawRect(hdc);		//绘制矩形
 	DrawEllipse(hdc);	//绘制椭圆
 	DrawBmp(hdc);		//绘制位图
+	//绘制字符串
+	SetTextColor(hdc, RGB(255, 0, 255));	//设置文本颜色为紫色
+	SetBkColor(hdc, RGB(0,255,0));	//设置文本背景颜色
+	SetBkMode(hdc, TRANSPARENT);	//设置文本背景模式为透明TRANSPARENT，文本背景颜色设置无效；OPAQUE表示不透明，文本背景颜色设置有效
+	//创建一个字体，字体高度30像素，宽度根据高度自动调整，字体倾斜45度，字体粗细900（范围0-1000），下划线、删除线、斜体均为true，
+	// 字符集为GB2312_CHARSET，输出精度、剪裁精度、质量均为默认值，字体名称为微软雅黑
+	HFONT hFont = CreateFont(30, 0, 45, 0, 500, 1, 1, 1, GB2312_CHARSET, 0, 0, 0, 0, L"微软雅黑");
+	HGDIOBJ hOldFont = SelectObject(hdc, hFont);	//将字体应用到DC中，保存原来DC中应用的字体句柄
+	LPCWSTR szText = L"Hello, Windows!";
+	//TextOut函数在坐标(250,400)输出字符串szText，字符串长度为wcslen(szText)
+	TextOut(hdc, 250, 400, szText, wcslen(szText));	//在坐标(300,400)输出字符串szText，字符串长度为wcslen(szText)
+	RECT rc;
+	rc.left = 100;
+	rc.top = 150;
+	rc.right = 200;
+	rc.bottom = 200;
+	////绘制矩形，左上角坐标(100,150)，宽度150，高度50；验证DrawText函数的文本对齐方式
+	//Rectangle(hdc, rc.left, rc.top, rc.right, rc.bottom);	
+	//DrawText函数在矩形rc中输出字符串szText，字符串长度为wcslen(szText)，文本对齐方式为左上角对齐
+	DrawText(hdc, szText, wcslen(szText), &rc, DT_LEFT | DT_TOP | DT_WORDBREAK);
+	SelectObject(hdc, hOldFont);	//取出DC中的字体，使用SelectObject函数将原来的字体重新应用到DC中
+	DeleteObject(hFont);	//释放字体
 	//4.取出DC中的画笔，使用SelectObject函数将原来的画笔重新应用到DC中
 	SelectObject(hdc, hOldPen);
 	//取出DC中的画刷，使用SelectObject函数将原来的画刷重新应用到DC中
@@ -182,6 +221,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msgID, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_PAINT:
 		OnPaint(hWnd);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);	//发送WM_QUIT消息，wParam=0，lParam=0
 		break;
 	default:
 		break;
