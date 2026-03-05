@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="UseCLib.c" />
     <ClCompile Include="UseCppLib.cpp" />
+    <ClCompile Include="UseDll.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
