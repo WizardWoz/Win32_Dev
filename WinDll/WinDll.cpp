@@ -15,7 +15,7 @@
  * 2.添加库程序
  * 3.库程序导出（提供给调用程序的库中函数信息）
  * (1)声明导出：使用_declspec(dllexport)；动态库编译链接后也存在.lib文件，存放的是C++编译器换名后的函数名以及标号
- * (2)模块定义文件.def：例如LIBRARY DLLFunc（库）；EXPORTS（库导出表）；DLL_MUL @1（导出的函数）
+ * (2)模块定义文件.def：例如LIBRARY DLLFunc（库）；EXPORTS（库导出表）；DLL_MUL @1（导出的函数）。换名前的函数名与标号
 */
 
 /**
@@ -28,21 +28,27 @@
  * 
  * 2.显式链接（调用程序负责使动态库执行）
  * (1)定义函数指针类型：typedef int(*DLL_ADD)(int, int);
- * (2)加载动态库：使用LoadLibrary函数加载动态库，返回一个模块句柄
- * (3)获取函数地址：使用GetProcAddress函数获取函数地址
+ * (2)加载动态库：使用LoadLibrary函数加载动态库进内存，返回一个DLL句柄
+ * (3)获取函数绝对地址：使用GetProcAddress函数获取函数地址
  * (4)调用函数：通过函数指针调用动态库中的函数
  * (5)释放动态库：使用FreeLibrary函数释放动态库
 */
 
-_declspec(dllexport) int WinDLL_add(int add1, int add2)
+/**
+ * 加减法使用模块定义方式导出，乘法使用声明导出方式导出
+*/
+
+int WinDLL_add(int add1, int add2)
 {
 	return add1 + add2;
 }
 
-_declspec(dllexport) int WinDLL_sub(int sub1, int sub2)
+int WinDLL_sub(int sub1, int sub2)
 {
 	return sub1 - sub2;
 }
+
+//声明导出方式导出乘法函数
 
 _declspec(dllexport) int WinDLL_mul(int mul1, int mul2)
 {

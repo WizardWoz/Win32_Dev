@@ -18,5 +18,18 @@
     <ClCompile Include="WinDll.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ClassDll.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="WinDll.def">
+      <Filter>源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ClassDll.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

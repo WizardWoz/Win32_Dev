@@ -1,0 +1,4 @@
+﻿LIBRARY WinDll
+EXPORTS
+	WinDLL_add @1
+	WinDLL_sub @2
