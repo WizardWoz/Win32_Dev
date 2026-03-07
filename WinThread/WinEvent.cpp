@@ -18,6 +18,7 @@ DWORD CALLBACK PrintProc(LPVOID pParam)
 	while (true)
 	{
 		WaitForSingleObject(g_hEvent, INFINITE);//一旦执行被阻塞于此，直到事件对象被设置为有信号状态，线程才会继续执行
+		//CreateEvent第2个参数为FALSE则无需ResetEvent
 		ResetEvent(g_hEvent);	//重置事件对象的状态为无信号，参数为事件对象的句柄
 		std::cout << "Event is signaled!" << std::endl;
 	}
@@ -34,8 +35,9 @@ DWORD CALLBACK CtrlProc(LPVOID pParam)
 	return 0;
 }
 
-int main(void)
+/*int main(void)
 {
+	//参数：1.安全属性，NULL表示默认；2.是否手动重置事件对象，TRUE表示需要手动重置；3.初始状态，FALSE表示无信号状态；4.事件对象名称，NULL表示匿名事件对象
 	g_hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	DWORD dwWaitResult = 0;	//等待结果
 	HANDLE hThread[2] = { 0 };	//线程句柄数组
@@ -44,4 +46,4 @@ int main(void)
 	WaitForMultipleObjects(2, hThread, TRUE, INFINITE);
 
 	return 0;
-}
+}*/

@@ -126,6 +126,7 @@
     <ClCompile Include="WinEvent.cpp" />
     <ClCompile Include="WinInterlock.cpp" />
     <ClCompile Include="WinMutex.cpp" />
+    <ClCompile Include="WinSemaphore.cpp" />
     <ClCompile Include="WinThread.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
