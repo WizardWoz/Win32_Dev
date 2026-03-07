@@ -53,7 +53,7 @@ DWORD CALLBACK TestProc2(LPVOID lpParam)
 	return 0;
 }
 
-int main(void)
+/*int main(void)
 {
 	DWORD threadId = 0;			//线程ID，系统为每个线程分配一个唯一的ID
 	LPCWSTR tparam1 = L"MyThread1"; // 线程名称，必须是宽字符类型字符串
@@ -82,4 +82,4 @@ int main(void)
 	ResumeThread(hThread2);	//恢复线程2，继续线程的执行
 	getchar();	//等待用户输入，防止主线程过早结束导致子线程无法执行
 	return 0;
-}
+}*/
