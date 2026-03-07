@@ -123,6 +123,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="WinEvent.cpp" />
     <ClCompile Include="WinInterlock.cpp" />
     <ClCompile Include="WinMutex.cpp" />
     <ClCompile Include="WinThread.cpp" />

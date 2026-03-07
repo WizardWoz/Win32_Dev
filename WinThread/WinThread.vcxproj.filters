@@ -24,5 +24,8 @@
     <ClCompile Include="WinMutex.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="WinEvent.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
